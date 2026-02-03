@@ -1,0 +1,448 @@
+<!DOCTYPE html>
+<html lang="ms">
+<head>
+<meta charset="UTF-8">
+<title>Sistem Pendataan Pejabat Daerah Nabawan - SPA</title>
+
+<style>
+* { box-sizing: border-box; margin:0; padding:0; }
+html, body {
+    height:100%;
+    font-family:"Segoe UI", Arial, sans-serif;
+    background:#f2f4f8;
+    line-height:1.6;
+}
+#app { display:flex; flex-direction:column; min-height:100vh; }
+
+/* ================= HEADER ================= */
+header {
+    background-color:#0c183c;
+    color:white;
+    padding:15px 40px;
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    position: sticky;
+    top:0;
+    z-index:1000;
+}
+.logo-area { display:flex; align-items:center; gap:12px; }
+.logo-img { width:55px; height:55px; object-fit:contain; }
+.header-banner { height:55px; object-fit:cover; border-radius:6px; }
+header .logo-area h1 { font-size:30px; }
+header .logo-area p { font-size:15px; opacity:0.9; }
+
+nav a {
+    color:white;
+    text-decoration:none;
+    margin-left:20px;
+    font-weight:100;
+    cursor:pointer;
+    transition:all 0.3s;
+}
+nav a:hover, nav a.active {
+    text-decoration:underline;
+    font-weight:bold;
+}
+
+/* ================= BANNER VIDEO ================= */
+.banner {
+    position: relative;
+    text-align: center;
+    color: white;
+    padding:150px 20px;
+    overflow: hidden;
+}
+
+.banner-video {
+    position: absolute;
+    top:50%;
+    left:50%;
+    width:100%;
+    height:100%;
+    object-fit:cover;
+    transform: translate(-50%, -50%);
+    z-index:0;
+    pointer-events:none;
+}
+
+.banner-overlay {
+    position:absolute;
+    inset:0;
+    background-color: rgba(0,0,0,0.45);
+    z-index:1;
+}
+
+/* Ubah saiz font untuk banner */
+.banner h2 {
+    position: relative;
+    z-index:2;
+    font-size: 60px; /* lebih besar */
+    font-weight: bold;
+    color: #ffffff;
+}
+
+.banner p {
+    position: relative;
+    z-index:2;
+    font-size: 24px; /* lebih besar */
+    font-weight: 500;
+    color: #f0f0f0;
+}
+
+/* ================= PAGE ================= */
+.page-section {
+    display:none;
+    padding:40px 20px;
+    width:100%;
+    max-width:1100px;
+    margin:0 auto;
+    flex:1;
+}
+.page-section.show { display:block; }
+
+.tajuk-utama {
+    text-align:center;
+    font-size:30px;
+    color:#030303;
+    margin-bottom:30px;
+}
+
+/* ================= BOX ================= */
+.utama-box {
+    background:#ffffff;
+    width:100%;
+    border-radius:14px;
+    padding:25px;
+    margin-bottom:30px;
+    box-shadow:0 5px 15px rgba(0,0,0,0.08);
+}
+.underline-title {
+    position: relative;
+    display: block;
+    padding-bottom: 6px;
+    margin-bottom: 18px;
+    font-size:22px;
+    color:#060606;
+    border-bottom:3px solid #020304;
+}
+
+/* ================= GRID ================= */
+.card-grid {
+    display:grid;
+    grid-template-columns:repeat(auto-fit,minmax(120px,1fr));
+    gap:15px;
+}
+.info-grid {
+    display:grid;
+    grid-template-columns:repeat(auto-fit,minmax(200px,1fr));
+    gap:15px;
+}
+.info-item {
+    background:#f3f6ff;
+    padding:15px;
+    border-radius:10px;
+    text-align:center;
+    font-weight:500;
+}
+
+/* ================= DEMOGRAFI CARD ================= */
+.stat-card, .alert-card, .animate-title {
+    opacity:0;                  
+    transform: translateY(30px);  
+    transition: opacity 0.8s ease, transform 0.8s ease;
+}
+.stat-card.show, .alert-card.show, .animate-title.show {
+    opacity:1;
+    transform: translateY(0);
+}
+.stat-card {
+    border-radius:12px;
+    background:#e3f2fd;
+    padding:15px;
+    box-shadow:0 2px 6px rgba(0,0,0,0.08);
+    display:flex;
+    flex-direction:column;
+    justify-content:center;
+    align-items:center;
+    position:relative;
+    height:140px;
+}
+.stat-card:hover { transform:scale(1.05); }
+
+.stat-card .count {
+    font-size:22px;
+    font-weight:bold;
+    color:#040404;
+    margin-bottom:6px;
+}
+.stat-card .label {
+    font-size:14px;
+    color:#020202;
+    text-align:center;
+}
+.stat-card .emoji {
+    position:absolute;
+    bottom:10px;
+    left:10px;
+    font-size:22px;
+}
+
+/* ================= ALERT ================= */
+.alert-card {
+    border-left:5px solid #e74c3c;
+    padding:18px;
+    border-radius:10px;
+    min-width:200px;
+    text-align:center;
+    background:#fff3f3;
+    display:flex;
+    flex-direction:column;
+    justify-content:center;
+    align-items:center;
+}
+.alert-card span {
+    display:block;
+    font-size:18px;
+    font-weight:bold;
+    margin-top:5px;
+}
+
+/* ================= FOOTER ================= */
+footer {
+    background-color:#2e2f33;
+    color:white;
+    text-align:center;
+    padding:20px 0;
+}
+
+/* ================= CHART ================= */
+#chartContainer {
+    max-width:600px;
+    margin:25px auto 0;
+}
+
+/* ================= MOBILE ================= */
+@media(max-width:800px){
+  nav { display:none; }
+  .header-banner { display:none; }
+  .card-grid { grid-template-columns:1fr !important; }
+}
+
+/* ================= PROFILE SUB-AREA NAV ================= */
+#profile nav a {
+    color: black;  
+    text-decoration: none;
+    font-weight: 500;
+}
+#profile nav a:hover {
+    text-decoration: underline;
+}
+</style>
+</head>
+
+<body>
+<div id="app">
+
+<header>
+  <div class="logo-area">
+    <img src="UN.png" class="logo-img">
+    <div>
+      <h1>⌘ Sistem Pendataan</h1>
+      <p>Pejabat Daerah Nabawan</p>
+    </div>
+  </div>
+
+  <nav>
+    <a data-target="utama" class="active">Utama</a>
+    <a data-target="profile">Profile</a>
+    <a data-target="demografi">Demografi</a>
+    <a data-target="sosioekonomi">SosioEkonomi</a>
+    <a data-target="kemudahan">Kemudahan</a>
+  </nav>
+
+  <img src="PD.png" class="header-banner">
+</header>
+
+<!-- ================= BANNER VIDEO ================= -->
+<section class="banner" id="banner">
+  <video class="banner-video" autoplay muted loop>
+    <source src="0201.mp4" type="video/mp4">
+    Your browser does not support HTML5 video.
+  </video>
+  <div class="banner-overlay"></div>
+  <h2 class="animate-title">Selamat Datang ke Portal Nabawan</h2>
+  <p class="animate-title">Lihat maklumat Daerah Nabawan secara sistematik dan berpusat.</p>
+</section>
+
+<!-- ================= UTAMA ================= -->
+<section id="utama" class="page-section show">
+<h2 class="tajuk-utama animate-title">RUMUSAN DATA & MAKLUMAT PENTADBIRAN KAMPUNG</h2>
+
+<div class="utama-box animate-title">
+  <h3 class="underline-title">Maklumat Pentadbiran Daerah Nabawan</h3>
+  <div class="info-grid">
+    <div class="info-item">Daerah: <b>Nabawan</b></div>
+    <div class="info-item">Parlimen: <b>P.182</b></div>
+    <div class="info-item">DUN: <b>N46</b></div>
+  </div>
+</div>
+
+<div class="utama-box animate-title">
+  <h3 class="underline-title">Demografi Kawasan & Kependudukan</h3>
+  <div id="demografiStats" class="card-grid">
+    <div class="stat-card" data-count="147"><span class="count">0</span><span class="label">Jumlah Kampung</span><span class="emoji">⧉</span></div>
+    <div class="stat-card" data-count="6"><span class="count">0</span><span class="label">Jumlah Mukim</span><span class="emoji">◈</span></div>
+    <div class="stat-card" data-count="28101"><span class="count">0</span><span class="label">Jumlah Penduduk</span><span class="emoji">◍</span></div>
+    <div class="stat-card" data-count="3920"><span class="count">0</span><span class="label">Jumlah Rumah</span><span class="emoji">⌂</span></div>
+    <div class="stat-card" data-count="4100"><span class="count">0</span><span class="label">Jumlah KIR</span><span class="emoji">▤</span></div>
+  </div>
+  <div id="chartContainer"><canvas id="demografiChart" width="600" height="300"></canvas></div>
+</div>
+
+<div class="utama-box animate-title">
+  <h3 class="underline-title">Struktur Pentadbiran Daerah</h3>
+  <div class="card-grid" style="grid-template-columns:repeat(4,1fr); gap:15px;">
+    <div class="stat-card">Ketua Daerah<span>1</span></div>
+    <div class="stat-card">KAN<span></span></div>
+    <div class="stat-card">WKAN<span></span></div>
+    <div class="stat-card">KK<span>#REF!</span></div>
+    <div class="stat-card">PPM<span>1</span></div>
+    <div class="stat-card">CDO<span>1</span></div>
+    <div class="stat-card">Pemaju Mukim<span>6</span></div>
+    <div class="stat-card">JKKK<span>#REF!</span></div>
+  </div>
+</div>
+
+<div class="utama-box animate-title">
+  <h3 class="underline-title">Maklumat Tambahan</h3>
+  <div class="card-grid">
+    <div class="alert-card" style="border-left-color:#000000;">Belum Ada Ketua Kampung<span>#REF!</span></div>
+    <div class="alert-card" style="border-left-color:#030303;">Belum Ada JKKK<span>#REF!</span></div>
+    <div class="alert-card" style="border-left-color:#000000;">Jumlah Miskin<span></span></div>
+    <div class="alert-card" style="border-left-color:#000000;">Miskin Tegar<span></span></div>
+  </div>
+</div>
+</section>
+
+<!-- ================= PROFILE ================= -->
+<section id="profile" class="page-section">
+<h2 class="animate-title">🏘 Profile Daerah</h2>
+<p class="animate-title">Pilih kawasan untuk melihat maklumat dan data:</p>
+
+<nav style="margin:20px 0; display:flex; gap:15px; flex-wrap:wrap;" class="animate-title">
+    <a href="NABAWAN .html" target="profileFrame">Nabawan</a>
+    <a href="SEPULUT.html" target="profileFrame">Sepulut</a>
+    <a href="PAGALUNGAN .html" target="profileFrame">Pagalungan</a>
+    <a href="PENSIANGAN.html" target="profileFrame">Pensiangan</a>
+    <a href="PEMUNTARIAN.html" target="profileFrame">Pemuntarian</a>
+</nav>
+
+<iframe name="profileFrame" src="NABAWAN .html" style="width:100%; height:600px; border:1px solid #0b0b0b; border-radius:8px;" class="animate-title"></iframe>
+</section>
+
+<section id="demografi" class="page-section">
+  <h2 class="animate-title">◉ Demografi</h2>
+  <p class="animate-title">Statistik umur dan populasi.</p>
+</section>
+
+<section id="sosioekonomi" class="page-section">
+  <h2 class="animate-title">▦ SosioEkonomi</h2>
+  <p class="animate-title">Data pekerjaan penduduk.</p>
+</section>
+
+<section id="kemudahan" class="page-section">
+  <h2 class="animate-title">▣ Kemudahan</h2>
+  <p class="animate-title">Maklumat kemudahan awam.</p>
+</section>
+
+<footer>
+<p>© 2026 Sistem Pendataan Pejabat Daerah Nabawan</p>
+</footer>
+
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+/* ================= NAVIGATION ================= */
+const sections = document.querySelectorAll('.page-section');
+const navLinks = document.querySelectorAll('header nav a');
+const banner = document.getElementById('banner');
+
+navLinks.forEach(link=>{
+  link.addEventListener('click',()=>{
+    const targetId = link.dataset.target;
+    sections.forEach(s=>s.classList.remove('show'));
+    document.getElementById(targetId).classList.add('show');
+    navLinks.forEach(l=>l.classList.remove('active'));
+    link.classList.add('active');
+    banner.style.display = (targetId==="utama") ? "block":"none";
+    window.scrollTo({top:0, behavior:'smooth'});
+  });
+});
+
+/* ================= LINE CHART ================= */
+new Chart(document.getElementById('demografiChart'),{
+  type:'line',
+  data:{
+    labels:['Jumlah Kampung','Jumlah Mukim','Jumlah Penduduk','Jumlah Rumah','Jumlah KIR'],
+    datasets:[{
+      label:'Demografi Nabawan',
+      data:[147,6,28101,3920,4100],
+      borderColor:'#0c183c',
+      backgroundColor:'rgba(12,24,60,0.15)',
+      fill:true,
+      tension:0.4,
+      pointRadius:5
+    }]
+  },
+  options:{
+    responsive:true,
+    animation:{ duration:1500 },
+    scales:{ y:{ beginAtZero:true } }
+  }
+});
+
+/* ================= COUNT-UP ================= */
+function animateCounts() {
+  const counters = document.querySelectorAll('.stat-card');
+  counters.forEach(counter=>{
+    let target = parseInt(counter.getAttribute('data-count'));
+    if(isNaN(target)) return;
+    let span = counter.querySelector('.count');
+    let count = 0;
+    let step = Math.ceil(target/100);
+    let interval = setInterval(()=>{
+      count += step;
+      if(count>=target){ count=target; clearInterval(interval);}
+      span.innerText = count.toLocaleString();
+    }, 20);
+  });
+}
+window.onload = animateCounts;
+
+/* ================= ADVANCED ANIMATION ================= */
+const animateItems = document.querySelectorAll('.animate-title');
+const statCards = document.querySelectorAll('.stat-card');
+const alertCards = document.querySelectorAll('.alert-card');
+
+const observer = new IntersectionObserver(entries=>{
+  entries.forEach(entry=>{
+    if(entry.isIntersecting){
+      if(!entry.target.classList.contains('stat-card') && !entry.target.classList.contains('alert-card')){
+        entry.target.classList.add('show');
+      } else {
+        const allCards = [...statCards, ...alertCards];
+        const index = allCards.indexOf(entry.target);
+        setTimeout(()=>{entry.target.classList.add('show');}, index*150);
+      }
+    }
+  });
+},{ threshold: 0.2 });
+
+animateItems.forEach(el=>observer.observe(el));
+[...statCards, ...alertCards].forEach(el=>observer.observe(el));
+</script>
+
+</body>
+</html>
